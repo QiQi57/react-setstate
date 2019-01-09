@@ -15,20 +15,20 @@ class Sample extends React.Component {
     this.setState({
       count: this.state.count + 1
     });
-    console.log(this.state.count);    // 打印
+    console.log(this.state.count);    // 打印 0
     this.setState({
       count: this.state.count + 1
     });
-    console.log(this.state.count);    // 打印
+    console.log(this.state.count);    // 打印 0
     setTimeout(function(){
         that.setState({
        count: that.state.count + 1
      });
-     console.log(that.state.count);   // 打印
+     console.log(that.state.count);   // 打印 2
      that.setState({
        count: that.state.count + 1
      });
-     console.log(that.state.count);   // 打印
+     console.log(that.state.count);   // 打印 3
     }, 0);
     // setTimeout(function(){
     //     that.setState({
