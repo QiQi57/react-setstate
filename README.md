@@ -2,6 +2,7 @@
  使用setState来修改react状态。setState不是同步更新状态，多个setState会进行合并操作，放到一个队列中，最终批量更新状态。
 ## 1.如何使用setState
 引用一个例子，
+```
 class Sample extends React.Component {
   constructor(props) {
     super(props);
