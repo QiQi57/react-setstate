@@ -54,13 +54,11 @@ class Sample extends React.Component {
         count: state.count + 1
       }
     });
-    console.log(this.state.count);   // 打印
     this.setState(function(state, props) {
       return {
         count: state.count + 2
       }
     });
-    console.log(this.state.count);   // 打印
 ```
 
 ## 3.setState 解决办法
