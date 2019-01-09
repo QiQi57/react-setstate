@@ -64,9 +64,10 @@ class Sample extends React.Component {
 ## 3.setState 解决办法
 
 ## 4.setState 相关事件
-
+setState -> shouldComponentUpdate ->componentWillUpdate ->render ->componentDidUpdate
 
 ## 5.setState 实现原理
+react setState 通过react transaction 来实现缓存和批量更新操作。
 
 
 
