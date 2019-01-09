@@ -43,7 +43,7 @@ class Sample extends React.Component {
     )
   }
 }
-
+```
 
 ## 2.setState 问题
 
