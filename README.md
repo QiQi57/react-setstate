@@ -63,8 +63,29 @@ class Sample extends React.Component {
 
 ## 3.setState 用法扩展
 setState第2个参数，可以取得state最新状态值
-
-
+```
+class Sample extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      count: 0
+    };
+  }
+  componentDidMount() {
+      var that=this;
+    this.setState({
+      count: this.state.count + 1
+    },function(pre){
+        console.log(this.state.count);    // 打印 1
+    });
+  }
+  render() {
+    return (
+      <h1>{this.state.count}</h1>
+    )
+  }
+}
+```
 
 ## 4.setState 相关事件
 setState -> shouldComponentUpdate ->componentWillUpdate ->render ->componentDidUpdate
