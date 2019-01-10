@@ -61,7 +61,10 @@ class Sample extends React.Component {
     });
 ```
 
-## 3.setState 解决办法
+## 3.setState 用法扩展
+setState第2个参数，可以取得state最新状态值
+
+
 
 ## 4.setState 相关事件
 setState -> shouldComponentUpdate ->componentWillUpdate ->render ->componentDidUpdate
