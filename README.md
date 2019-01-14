@@ -118,6 +118,9 @@ react setState 通过react transaction 来实现批量更新操作。下面是tr
  *                    +-----------------------------------------+
  * </pre>
 ```
+transaction 文档https://github.com/facebook/react/blob/401e6f10587b09d4e725763984957cf309dfdc30/src/shared/utils/Transaction.js
+
+
 
 
 
