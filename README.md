@@ -1,6 +1,6 @@
 # setState 
  使用setState来修改react状态。setState不是同步更新状态，多个setState会进行合并操作，放到一个队列中，最终批量更新状态。
-## 1.如何使用setState
+## 1.使用setState，传入对象
 引用一个例子，
 ```
 class Sample extends React.Component {
@@ -45,7 +45,7 @@ class Sample extends React.Component {
 }
 ```
 
-## 2.setState 问题
+## 2.setState 传入函数
 上面例子的结果，0 0 是因为setState的时候react 会把多个操作放到一个队列缓存，通过react transaction 来实现，执行批量更新。3是因为settimeout作为一个单独事务来执行，并且开始的两个setState 合并操作，只有最后一个setState起作用了。
 如何才能不把两次操作合并呢？可以setState传入函数来解决，最终count的值为3
 ```
@@ -61,7 +61,7 @@ class Sample extends React.Component {
     });
 ```
 
-## 3.setState 用法扩展
+## 3.setState 第2个参数（用法扩展）
 setState第2个参数，可以取得state最新状态值
 ```
 class Sample extends React.Component {
