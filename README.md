@@ -92,6 +92,7 @@ setState -> shouldComponentUpdate ->componentWillUpdate ->render ->componentDidU
 
 ## 5.setState batch update 批量更新实现原理
 react setState 通过react transaction 来实现批量更新操作。下面是transaction 执行过程。transaction 创建的时候需要传入getTransactionWrappers，并且传入需要是个数组集合，集合中每个对象都需要实现initialize和close方法。当transaction实例开始perform(anyMethod)时候，会initializeAll(0) 把所有wrapper中initialize都执行，然后执行anyMethod，最后会调用closeAll(0),把所有wrapper中的close方法都执行。
+下面看一下transaction的执行示意图（把源码中的图稍微修改一下）：
 ```
  * <pre>
  *                       wrappers (injected at creation time)
@@ -106,14 +107,14 @@ react setState 通过react transaction 来实现批量更新操作。下面是tr
  *                    |   |     +----|   wrapper2  |--------+   |
  *                    |   |     |    +-------------+  |     |   |
  *                    |   |     |                     |     |   |
- *                    |   v     v                     v     v   | wrapper
+ *                    |                               v     v   | wrapper
  *                    | +---+ +---+   +---------+   +---+ +---+ | invariants
  * perform(anyMethod) | |   | |   |   |         |   |   | |   | | maintained
  * +----------------->|-|---|-|---|-->|anyMethod|---|---|-|---|-|-------->
+ *                    | |   ^ |   ^   |         ^   |   ^ |   ^ |
  *                    | |   | |   |   |         |   |   | |   | |
- *                    | |   | |   |   |         |   |   | |   | |
- *                    | |   | |   |   |         |   |   | |   | |
- *                    | +---+ +---+   +---------+   +---+ +---+ |
+ *                    | v   | v   |   v         |   v   | v   | |
+ *                    |  ---   ---     ---------     ---   --- |
  *                    |  initialize                    close    |
  *                    +-----------------------------------------+
  * </pre>
