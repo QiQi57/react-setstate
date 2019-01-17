@@ -91,7 +91,7 @@ class Sample extends React.Component {
 setState -> shouldComponentUpdate ->componentWillUpdate ->render ->componentDidUpdate
 
 ## 5.setState batch update 批量更新实现原理
-react setState 通过react transaction 来实现批量更新操作。下面是transaction 执行过程。transaction 创建的时候需要传入getTransactionWrapper，并且传入需要是个数组集合，集合中每个对象都需要实现initialize和close方法。当transaction实例开始perform(anyMethod)时候，会initializeAll(0) 把所有wrapper中initialize都执行，然后执行anyMethod，最后会调用closeAll(0),把所有wrapper中的close方法都执行。
+react setState 通过react transaction 来实现批量更新操作。下面是transaction 执行过程。transaction 创建的时候需要传入getTransactionWrappers，并且传入需要是个数组集合，集合中每个对象都需要实现initialize和close方法。当transaction实例开始perform(anyMethod)时候，会initializeAll(0) 把所有wrapper中initialize都执行，然后执行anyMethod，最后会调用closeAll(0),把所有wrapper中的close方法都执行。
 ```
  * <pre>
  *                       wrappers (injected at creation time)
@@ -118,6 +118,82 @@ react setState 通过react transaction 来实现批量更新操作。下面是tr
  *                    +-----------------------------------------+
  * </pre>
 ```
+
+先看一下transaction perform 函数的实现源码。当调用transaction的perform方法时，会先执行this.initializeAll(0)，然后执行perform传入的方法，最后执行this.closeAll(0)。transaction的实现就是这么简单。问题的关键就在于getTransactionWrappers 函数，initialize 和close方法都是通过这个函数，在transaction初始化的时候传入的。
+```
+ perform: function(method, scope, a, b, c, d, e, f) {
+    var errorThrown;
+    var ret;
+    try {
+      this._isInTransaction = true;
+      errorThrown = true;
+      this.initializeAll(0); //把初始化时 传入的wrappers 数组中的所有initialize都执行
+      ret = method.call(scope, a, b, c, d, e, f);//perform 调用时传入需要执行的方法 
+      errorThrown = false;
+    } finally {
+      try {
+        if (errorThrown) {
+          try {
+            this.closeAll(0);//把初始化时 传入的wrappers 数组中的所有close都执行(initialize或perform传入的方法异常时会执行)
+          } catch (err) {
+          }
+        } else {
+          this.closeAll(0);//把初始化时 传入的wrappers 数组中的所有close都执行
+        }
+      } finally {
+        this._isInTransaction = false;
+      }
+    }
+    return ret;
+  },
+```
+下面看一下transaction initializeAll 和 函数的实现源码：
+```
+ initializeAll: function(startIndex) {
+    var transactionWrappers = this.transactionWrappers;
+    for (var i = startIndex; i < transactionWrappers.length; i++) {
+      var wrapper = transactionWrappers[i];
+      try {
+        this.wrapperInitData[i] = Transaction.OBSERVED_ERROR;
+        this.wrapperInitData[i] = wrapper.initialize ?
+          wrapper.initialize.call(this) :
+          null;// 执行所有的 initialize 方法
+      } finally {
+        if (this.wrapperInitData[i] === Transaction.OBSERVED_ERROR) {
+          try {
+            this.initializeAll(i + 1);//initialize 异常时，执行下一个 initialize 方法
+          } catch (err) {
+          }
+        }
+      }
+    }
+  },
+  closeAll: function(startIndex) {
+    var transactionWrappers = this.transactionWrappers;
+    for (var i = startIndex; i < transactionWrappers.length; i++) {
+      var wrapper = transactionWrappers[i];
+      var initData = this.wrapperInitData[i];
+      var errorThrown;
+      try {
+        errorThrown = true;
+        if (initData !== Transaction.OBSERVED_ERROR && wrapper.close) {
+          wrapper.close.call(this, initData);// 执行所有的 close 方法
+        }
+        errorThrown = false;
+      } finally {
+        if (errorThrown) {
+          try {
+            this.closeAll(i + 1);//close 异常时，执行下一个 close 方法
+          } catch (e) {
+          }
+        }
+      }
+    }
+    this.wrapperInitData.length = 0;
+  }
+```
+
+
 transaction 文档https://github.com/facebook/react/blob/401e6f10587b09d4e725763984957cf309dfdc30/src/shared/utils/Transaction.js
 
 
