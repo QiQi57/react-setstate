@@ -199,6 +199,7 @@ transaction 文档https://github.com/facebook/react/blob/401e6f10587b09d4e725763
 
 setState如何使用transaction 完成batch update?
 
+看一下源码，首先定义需要执行的操作 FLUSH_BATCHED_UPDATES，RESET_BATCHED_UPDATES，通过getTransactionWrappers 接口传入transaction 中。当调用 ReactDefaultBatchingStrategy.batchedUpdates ，如果当前处于isBatchingUpdates=false，会通过transation执行callback，并且在close函数中会先调用flushBatchedUpdates，然后重置状态isBatchingUpdates 的值 ；如果isBatchingUpdates=true，会直接调用callback.
 
 ```
 var RESET_BATCHED_UPDATES = {
