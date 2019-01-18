@@ -251,11 +251,38 @@ var ReactDefaultBatchingStrategy = {
 
 ## 6.setState 合并操作实现原理
 
+通过上面事务我们看到 flushBatchedUpdates 执行批量更新。在flushBatchedUpdates 后续操作中，_processPendingState 会先对修改的state进行合并。所以，如果setState传入的是函数，不会对修改操作进行合并，而是会立即执行修改，把最终状态合并到最新状态。这就解释了上面例子中，如果需要进行连续修改状态，可以通过setState传入函数来实现。
 
+```
+  _processPendingState: function(props, context) {
+    var inst = this._instance;
+    var queue = this._pendingStateQueue;
+    var replace = this._pendingReplaceState;
+    this._pendingReplaceState = false;
+    this._pendingStateQueue = null;
 
+    if (!queue) {
+      return inst.state;
+    }
 
+    if (replace && queue.length === 1) {
+      return queue[0];
+    }
 
+    var nextState = assign({}, replace ? queue[0] : inst.state);
+    for (var i = replace ? 1 : 0; i < queue.length; i++) {
+      var partial = queue[i];
+      assign(
+        nextState,
+        typeof partial === 'function' ?
+          partial.call(inst, nextState, props, context) :
+          partial
+      );//合并修改的状态
+    }
 
+    return nextState;
+  },
+```
 
 
 
