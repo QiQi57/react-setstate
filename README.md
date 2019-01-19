@@ -49,6 +49,15 @@ class Sample extends React.Component {
 上面例子的结果，0 0 是因为setState的时候react 会把多个操作放到一个队列缓存，通过react transaction 来实现，执行批量更新。3是因为settimeout作为一个单独事务来执行，并且开始的两个setState 合并操作，只有最后一个setState起作用了。
 如何才能不把两次操作合并呢？可以setState传入函数来解决，最终count的值为3
 ```
+class RootFun extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      count: 0
+    };
+  }
+  componentDidMount() {
+    let that = this;
     this.setState(function(state, props) {
       return {
         count: state.count + 1
@@ -59,6 +68,14 @@ class Sample extends React.Component {
         count: state.count + 2
       }
     });
+  }
+  render() {
+    return (
+      <h1>{this.state.count}</h1>   //页面中将打印出3
+    )
+  }
+}
+
 ```
 
 ## 3.setState 第2个参数（用法扩展）
