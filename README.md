@@ -1,5 +1,9 @@
 # setState 
- 使用setState来修改react状态。如果setState传入的是对象，修改了状态之后不会立即更新状态，而是把状态放到一个队列中，如果多个setState都修改了状态，会对这些修改操作进行合并，然后批量更新状态。如果setState传入的是函数，会作为一个独立事务执行（不会放入队列中），并把结果合并成新的状态返回。
+ 使用setState来修改react状态。如果setState传入的是对象，修改了状态之后不会立即更新状态，而是把状态放到一个队列中，如果多个setState都修改了状态，会对这些修改操作进行合并（shallowly merged），然后批量更新状态。如果setState传入的是函数，会作为一个独立事务执行（不会放入队列中），并把结果合并（shallowly merged）成新的状态返回。
+ 
+ 备注：setState 会re-render组件，除非shouldComponentUpdate() 返回false.
+    状态merge的时候是shallowly merged。
+    默认情况下react只在event handlers中才会进行batch update.根据官方文档／开发者介绍，好像react 17.x发布之后，会进行统一，都会进行batch update。
 ## 1.使用setState，传入对象
 引用一个例子，
 ```
