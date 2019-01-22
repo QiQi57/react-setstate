@@ -79,7 +79,7 @@ class RootFun extends React.Component {
 ```
 
 ## 3.setState 第2个参数（用法扩展）
-setState第2个参数，可以取得state最新状态值
+componentDidUpdate 和 setState callback (setState(updater, callback))都可以取得最新状态，推荐使用componentDidUpdate。setState callback 会在setState完成并且会在组件的re-rendered之后执行。
 ```
 class Sample extends React.Component {
   constructor(props) {
