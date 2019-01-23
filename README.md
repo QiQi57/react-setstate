@@ -3,7 +3,7 @@
  
  备注：setState 会re-render组件，除非shouldComponentUpdate() 返回false.
     状态merge的时候是shallowly merged。
-    默认情况下react只在event handlers中才会进行batch update.根据官方文档／开发者介绍，好像react 17.x发布之后，会进行统一，都会进行batch update。
+    默认情况下react只在event handlers中才会进行batch update.根据官方文档／开发者介绍，react 17.x发布之后，会进行统一，都会进行batch update。
 ## 1.使用setState，传入对象
 引用一个例子，
 ```
@@ -270,9 +270,11 @@ var ReactDefaultBatchingStrategy = {
 };
 ```
 
+
+
 ## 6.setState 合并操作实现原理
 
-通过上面事务我们看到 flushBatchedUpdates 执行批量更新。在flushBatchedUpdates 后续操作中，_processPendingState 会先对修改的state进行合并。所以，如果setState传入的是函数，不会对修改操作进行合并，而是会立即执行修改，把最终状态合并到最新状态。这就解释了上面例子中，如果需要进行连续修改状态，可以通过setState传入函数来实现。
+通过上面事务我们看到 flushBatchedUpdates 执行批量更新。在flushBatchedUpdates 后续操作中，_processPendingState 会先对修改的state进行合并(shallowly merged)。所以，如果setState传入的是函数，不会对修改操作进行合并，而是会立即执行修改，把最终状态合并到最新状态。这就解释了上面例子中，如果需要进行连续修改状态，可以通过setState传入函数来实现。
 
 ```
   _processPendingState: function(props, context) {
