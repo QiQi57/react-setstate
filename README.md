@@ -220,7 +220,7 @@ transaction 文档https://github.com/facebook/react/blob/401e6f10587b09d4e725763
 
 setState如何使用transaction 完成batch update?
 
-看一下源码，首先定义需要执行的操作 FLUSH_BATCHED_UPDATES，RESET_BATCHED_UPDATES，通过getTransactionWrappers 接口传入transaction 中。当调用 ReactDefaultBatchingStrategy.batchedUpdates ，如果当前处于isBatchingUpdates=false，会通过transation执行callback，并且在close函数中会先调用flushBatchedUpdates，然后重置状态isBatchingUpdates 的值 ；如果isBatchingUpdates=true，会直接调用callback.
+看一下源码，首先定义需要执行的操作 FLUSH_BATCHED_UPDATES，RESET_BATCHED_UPDATES，通过getTransactionWrappers 接口传入transaction 中。当调用 ReactDefaultBatchingStrategy.batchedUpdates ，如果当前处于isBatchingUpdates=false，会通过transation执行callback，并且在close函数中会先调用flushBatchedUpdates（通过此函数来进行batch update），然后重置状态isBatchingUpdates 的值 ；如果isBatchingUpdates=true，会直接调用callback.
 
 ```
 var RESET_BATCHED_UPDATES = {
@@ -268,6 +268,40 @@ var ReactDefaultBatchingStrategy = {
     }
   }
 };
+```
+react 批量更新就是通过调用 flushBatchedUpdates 来实现，来看下如何实现？在flushBatchedUpdates中，我们会执行另一个事务ReactUpdatesFlushTransaction，并且主函数是runBatchedUpdates，主函数会进入react生命周期，判断是否需要更新。
+```
+    if (dirtyComponents.length) {
+      var transaction = ReactUpdatesFlushTransaction.getPooled();
+      transaction.perform(runBatchedUpdates, null, transaction);
+      ReactUpdatesFlushTransaction.release(transaction);
+    }
+```
+runBatchedUpdates 实现如下，会发现_pendingCallbacks函数放到事务的callbackQueue中缓存起来，为什么这样操作？callback不能立即执行，需要render之后再执行，所以先放到事务的callbackQueue中。
+```
+function runBatchedUpdates(transaction) {
+  var len = transaction.dirtyComponentsLength;
+  dirtyComponents.sort(mountOrderComparator);
+  for (var i = 0; i < len; i++) {
+    var component = dirtyComponents[i];
+    var callbacks = component._pendingCallbacks;
+    component._pendingCallbacks = null;
+
+    ReactReconciler.performUpdateIfNecessary(
+      component,
+      transaction.reconcileTransaction
+    );
+
+    if (callbacks) {
+      for (var j = 0; j < callbacks.length; j++) {
+        transaction.callbackQueue.enqueue(
+          callbacks[j],
+          component.getPublicInstance()
+        );
+      }
+    }
+  }
+}
 ```
 
 
