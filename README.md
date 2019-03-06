@@ -342,6 +342,17 @@ function runBatchedUpdates(transaction) {
 ```
 
 
+备注：   
+1. shouldComponentUpdate 或 componentWillUpdate 方 法 中 调 用 setState ，
+ 此 时 this._pendingStateQueue != null，则 performUpdateIfNecessary 方法就会调用 updateComponent 方法进行组件更新，
+ 但 updateComponent 方法又会调用 shouldComponentUpdate 和 componentWill- Update 方法，因此造成循环调用，
+ 使得浏览器内存占满后崩溃
+
+为什么componentWillUpdate 调用setState会死循环，componentDidUpdate 不会？
+
+2. 初次渲染的时候，render时候会开启事务（batchUpdate）
+_renderNewRootComponent
+
 
 
 
